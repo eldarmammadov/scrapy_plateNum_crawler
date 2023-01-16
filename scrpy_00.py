@@ -13,21 +13,24 @@ class plateScraper(scrapy.Spider):
         for row in columnA_values:
             global  plate_num_xlsx
             plate_num_xlsx=row
+            print("+",plate_num_xlsx)
             base_url =f"https://dvlaregistrations.dvla.gov.uk/search/results.html?search={plate_num_xlsx}&action=index&pricefrom=0&priceto=&prefixmatches=&currentmatches=&limitprefix=&limitcurrent=&limitauction=&searched=true&openoption=&language=en&prefix2=Search&super=&super_pricefrom=&super_priceto="
             url=base_url
-            yield scrapy.Request(url)
+            yield scrapy.Request(url,callback=self.parse)
 
     def parse(self, response):
 
         for row in response.css('div.resultsstrip'):
             plate = row.css('a::text').get()
             price = row.css('p::text').get()
+            a = plate.replace(" ", "").strip()
+            print(plate_num_xlsx,a,a == plate_num_xlsx)
             if plate_num_xlsx==plate.replace(" ","").strip():
                 item= {"plate": plate.strip(), "price": price.strip()}
                 itemList.append(item)
                 yield  item
             else:
-                item = {"plate": plate.strip(), "price": "-"}
+                item = {"plate": plate_num_xlsx, "price": "-"}
                 itemList.append(item)
                 yield item
 
