@@ -16,9 +16,9 @@ class plateScraper(scrapy.Spider):
             print("+",plate_num_xlsx)
             base_url =f"https://dvlaregistrations.dvla.gov.uk/search/results.html?search={plate_num_xlsx}&action=index&pricefrom=0&priceto=&prefixmatches=&currentmatches=&limitprefix=&limitcurrent=&limitauction=&searched=true&openoption=&language=en&prefix2=Search&super=&super_pricefrom=&super_priceto="
             url=base_url
-            yield scrapy.Request(url,callback=self.parse)
+            yield scrapy.Request(url,callback=self.parse, cb_kwargs={'plate_num_xlsx': plate_num_xlsx})
 
-    def parse(self, response):
+    def parse(self, response, plate_num_xlsx=None):
 
         for row in response.css('div.resultsstrip'):
             plate = row.css('a::text').get()
