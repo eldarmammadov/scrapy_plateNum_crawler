@@ -1,8 +1,8 @@
 import scrapy
 from scrapy.crawler import CrawlerProcess
 import pandas as pd
-import openpyxl
 
+itemList=[]
 class plateScraper(scrapy.Spider):
     name = 'scrapePlate'
     allowed_domains = ['dvlaregistrations.dvla.gov.uk']
@@ -18,7 +18,7 @@ class plateScraper(scrapy.Spider):
             yield scrapy.Request(url)
 
     def parse(self, response):
-        itemList=[]
+
         for row in response.css('div.resultsstrip'):
             plate = row.css('a::text').get()
             price = row.css('p::text').get()
@@ -31,12 +31,9 @@ class plateScraper(scrapy.Spider):
                 itemList.append(item)
                 yield item
 
-        with pd.ExcelWriter('output_res.xlsx',engine='openpyxl', mode='r+',if_sheet_exists='overlay') as writer:
-            book=load_workbook('output_res.xlsx')
-            lastRow=book['result']['plate']
-            maxrow = max(c.row for c in lastRow if c.value is not None)
+        with pd.ExcelWriter('output_res.xlsx', mode='r+',if_sheet_exists='overlay') as writer:
             df_output = pd.DataFrame(itemList)
-            df_output.to_excel(writer, sheet_name='result', index=False, header=True,startrow=maxrow)
+            df_output.to_excel(writer, sheet_name='result', index=False, header=True)
 
 process = CrawlerProcess()
 process.crawl(plateScraper)
